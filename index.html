@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SUNOFORGE DARK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060404;--surface:#0f0b09;--surface2:#171009;--border:#2a1a10;--border-bright:#4a2a18;--red:#8b1010;--red-bright:#c0261a;--red-glow:rgba(192,38,26,0.3);--gold:#8a6a28;--gold-bright:#c49a3c;--bone:#cfc3a8;--bone-dim:#7a6e5a;--muted:#3d3028;--chip-bg:#130e0a;--chip-sel:#2a0808;--chip-sel-b:#8b1010;--green:#3a8a3a;--green-dim:#7ac47a}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--bone);font-family:'Cinzel',serif;min-height:100vh;padding-bottom:40px}
+header{text-align:center;padding:28px 16px 18px;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+header::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:300px;height:2px;background:linear-gradient(90deg,transparent,var(--red-bright),transparent)}
+.logo{font-family:'Cinzel Decorative',serif;font-size:clamp(20px,6vw,32px);color:var(--red-bright);letter-spacing:.15em;text-shadow:0 0 20px var(--red-glow);line-height:1}
+.logo-sub{font-size:10px;letter-spacing:.4em;color:var(--bone-dim);margin-top:6px;text-transform:uppercase}
+.sigil{display:block;margin:0 auto 8px;opacity:.6}
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:100}
+.tab{flex:1;padding:13px 8px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--bone-dim);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+.tab.active{color:var(--red-bright);border-bottom-color:var(--red-bright)}
+.panel{display:none}.panel.active{display:block}
+.section{padding:16px 14px 10px;border-bottom:1px solid var(--border)}
+.section-title{font-size:9px;letter-spacing:.35em;text-transform:uppercase;color:var(--gold-bright);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border-bright),transparent)}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{padding:7px 11px;background:var(--chip-bg);border:1px solid var(--border);border-radius:2px;font-family:'Cinzel',serif;font-size:10px;color:var(--bone-dim);cursor:pointer;transition:all .15s;user-select:none;-webkit-user-select:none}
+.chip.selected{background:var(--chip-sel);border-color:var(--chip-sel-b);color:var(--bone);box-shadow:0 0 8px var(--red-glow)}
+.bpm-row{display:flex;align-items:center;gap:12px;margin-top:4px}
+.bpm-slider{flex:1;-webkit-appearance:none;height:3px;background:linear-gradient(90deg,var(--red-bright) var(--pct,50%),var(--border) var(--pct,50%));border-radius:2px;outline:none}
+.bpm-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--red-bright);box-shadow:0 0 6px var(--red-glow);cursor:pointer}
+.bpm-display{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--red-bright);min-width:52px;text-align:right}
+.bpm-beatless{padding:7px 11px;background:var(--chip-bg);border:1px solid var(--border);border-radius:2px;font-family:'Cinzel',serif;font-size:10px;color:var(--bone-dim);cursor:pointer;user-select:none;-webkit-user-select:none}
+.bpm-beatless.selected{background:var(--chip-sel);border-color:var(--chip-sel-b);color:var(--bone)}
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;cursor:pointer;user-select:none;-webkit-user-select:none}
+.tog-track{width:36px;height:20px;background:var(--border);border-radius:10px;position:relative;transition:background .2s;flex-shrink:0}
+.tog-track.on{background:var(--red)}
+.tog-knob{position:absolute;top:3px;left:3px;width:14px;height:14px;background:var(--bone-dim);border-radius:50%;transition:left .2s}
+.tog-track.on .tog-knob{left:19px;background:var(--bone)}
+.tog-label{font-size:10px;letter-spacing:.15em;color:var(--bone-dim);text-transform:uppercase}
+.tog-track.on~.tog-label{color:var(--bone)}
+.lang-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.lang-chip{padding:6px 10px;background:var(--chip-bg);border:1px solid var(--border);border-radius:2px;font-family:'Cinzel',serif;font-size:10px;color:var(--bone-dim);cursor:pointer;user-select:none;-webkit-user-select:none;transition:all .15s}
+.lang-chip.selected{background:#0a1a0a;border-color:var(--green);color:var(--green-dim)}
+#lang-section{display:none}
+#lang-section.visible{display:block}
+.cue-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.cue-btn{padding:6px 10px;background:#0d0a08;border:1px solid var(--border);border-radius:2px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold-bright);cursor:pointer;user-select:none;-webkit-user-select:none}
+.cue-btn:active{background:#1a0f0a}
+.lyric-area{width:100%;background:#080504;border:1px solid var(--border);border-radius:2px;color:var(--bone);font-family:'Share Tech Mono',monospace;font-size:12px;line-height:1.7;padding:12px;resize:vertical;min-height:180px;outline:none;caret-color:var(--red-bright)}
+.lyric-area:focus{border-color:var(--border-bright)}
+.word-count{font-family:'Share Tech Mono',monospace;font-size:10px;text-align:right;margin-top:4px}
+.word-count.under{color:var(--red-bright)}.word-count.over{color:var(--green-dim)}
+.gen-btn{display:block;width:100%;padding:12px;background:#0d1a0d;border:1px solid var(--green);border-radius:2px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:var(--green-dim);cursor:pointer;text-transform:uppercase;margin-bottom:10px;transition:background .15s}
+.gen-btn:disabled{opacity:.5;cursor:not-allowed}
+.build-btn{display:block;width:100%;padding:16px;background:var(--red);border:1px solid var(--red-bright);border-radius:2px;font-family:'Cinzel Decorative',serif;font-size:13px;letter-spacing:.2em;color:var(--bone);cursor:pointer;text-transform:uppercase;box-shadow:0 0 20px rgba(139,16,16,.3);transition:background .15s}
+.build-btn:active{background:var(--red-bright)}
+.loading{display:none;text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--red-bright);letter-spacing:.2em;padding:14px;animation:pulse 1.2s infinite}
+.loading.on{display:block}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px}
+.tcard{background:var(--surface2);border:1px solid var(--border);border-radius:3px;padding:12px 10px;cursor:pointer;position:relative;overflow:hidden;transition:border-color .2s}
+.tcard::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--red);opacity:.6}
+.tcard:active{border-color:var(--red-bright)}
+.tcard-bpm{position:absolute;top:8px;right:8px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--red-bright)}
+.tcard-name{font-size:10px;font-weight:700;color:var(--bone);margin-bottom:4px;line-height:1.3}
+.tcard-sub{font-size:9px;color:var(--bone-dim);line-height:1.4}
+.out-wrap{padding:14px}
+.out-box{margin-bottom:18px}
+.out-label{font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold-bright);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.copy-btn{padding:5px 12px;background:var(--red);border:1px solid var(--red-bright);border-radius:2px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.15em;color:var(--bone);cursor:pointer;text-transform:uppercase}
+.copy-btn.copied{background:#1a3a1a;border-color:#3a8a3a}
+.out-text{background:#060403;border:1px solid var(--border);border-radius:2px;padding:14px;font-family:'Share Tech Mono',monospace;font-size:12px;line-height:1.8;color:var(--bone);white-space:pre-wrap;word-break:break-word;min-height:60px}
+.out-text .ctag{color:var(--gold-bright)}
+.out-text .empty{color:var(--muted);font-style:italic}
+.runes{text-align:center;color:var(--muted);font-size:18px;letter-spacing:12px;padding:8px;user-select:none}
+.hint{text-align:center;font-size:9px;letter-spacing:.2em;color:var(--muted);padding:8px}
+</style>
+</head>
+<body>
+
+<header>
+  <svg class="sigil" width="40" height="40" viewBox="0 0 40 40" fill="none">
+    <circle cx="20" cy="20" r="18" stroke="#8b1010" stroke-width="0.8" opacity="0.6"/>
+    <polygon points="20,4 23.8,14.8 35.5,14.8 25.8,21.6 29.6,32.4 20,25.6 10.4,32.4 14.2,21.6 4.5,14.8 16.2,14.8" stroke="#8b1010" stroke-width="0.8" fill="none" opacity="0.5"/>
+    <circle cx="20" cy="20" r="2" fill="#c0261a" opacity="0.7"/>
+  </svg>
+  <div class="logo">SunoForge Dark</div>
+  <div class="logo-sub">Ritual Prompt Architect</div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('forge')">⚒ Forge</button>
+  <button class="tab" onclick="switchTab('rituals')">☽ Rituals</button>
+  <button class="tab" onclick="switchTab('output')">✦ Output</button>
+</div>
+
+<!-- FORGE -->
+<div class="panel active" id="panel-forge">
+
+  <div class="section">
+    <div class="section-title">Genre / Style</div>
+    <div class="chips">
+      <span class="chip" data-g="genre">Dark Ritualistic Ambient</span><span class="chip" data-g="genre">Blackened Folk</span><span class="chip" data-g="genre">Industrial Occult</span><span class="chip" data-g="genre">Symphonic Black Metal</span><span class="chip" data-g="genre">Horror Soundscape</span><span class="chip" data-g="genre">Dark Cabaret</span><span class="chip" data-g="genre">Dark Liturgical</span><span class="chip" data-g="genre">Blackened Sludge Metal</span><span class="chip" data-g="genre">Dark Middle Eastern Folk</span><span class="chip" data-g="genre">Victorian Horror</span><span class="chip" data-g="genre">Cyber-Occult</span><span class="chip" data-g="genre">Viking War Chant</span><span class="chip" data-g="genre">Witch House</span><span class="chip" data-g="genre">Dungeon Synth</span><span class="chip" data-g="genre">Psytrance</span><span class="chip" data-g="genre">Darkwave</span><span class="chip" data-g="genre">Dark Jazz</span><span class="chip" data-g="genre">Doom-Folk</span><span class="chip" data-g="genre">Celtic Death</span><span class="chip" data-g="genre">Baroque Black Metal</span><span class="chip" data-g="genre">Pharaonic Ambient</span><span class="chip" data-g="genre">Dark Synthwave</span><span class="chip" data-g="genre">Pagan</span><span class="chip" data-g="genre">Ancient Mesopotamian</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Mood</div>
+    <div class="chips">
+      <span class="chip" data-g="mood">Occult</span><span class="chip" data-g="mood">Sinister</span><span class="chip" data-g="mood">Ancient</span><span class="chip" data-g="mood">Eerie</span><span class="chip" data-g="mood">Primal</span><span class="chip" data-g="mood">Aggressive</span><span class="chip" data-g="mood">Ritualistic</span><span class="chip" data-g="mood">Hypnotic</span><span class="chip" data-g="mood">Cinematic</span><span class="chip" data-g="mood">Haunting</span><span class="chip" data-g="mood">Atmospheric</span><span class="chip" data-g="mood">Desolate</span><span class="chip" data-g="mood">Chaotic</span><span class="chip" data-g="mood">Explosive</span><span class="chip" data-g="mood">Menacing</span><span class="chip" data-g="mood">Theatrical</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Instruments</div>
+    <div class="chips">
+      <span class="chip" data-g="inst">Tribal War Drums</span><span class="chip" data-g="inst">Throat Singing</span><span class="chip" data-g="inst">Distorted Cello</span><span class="chip" data-g="inst">Carnyx Horn</span><span class="chip" data-g="inst">Ney Flute</span><span class="chip" data-g="inst">Lyre</span><span class="chip" data-g="inst">Bronze Rattles</span><span class="chip" data-g="inst">Bone Flute</span><span class="chip" data-g="inst">Pipe Organ</span><span class="chip" data-g="inst">Hurdy-Gurdy</span><span class="chip" data-g="inst">Theremin</span><span class="chip" data-g="inst">Bağlama Saz</span><span class="chip" data-g="inst">Taglharpa</span><span class="chip" data-g="inst">Distorted Electric Guitar</span><span class="chip" data-g="inst">Heavy Sub Bass</span><span class="chip" data-g="inst">Gregorian Choir</span><span class="chip" data-g="inst">Detuned Piano</span><span class="chip" data-g="inst">Music Box</span><span class="chip" data-g="inst">Harpsichord</span><span class="chip" data-g="inst">Frame Drums</span><span class="chip" data-g="inst">War Drums</span><span class="chip" data-g="inst">Sitar</span><span class="chip" data-g="inst">Didgeridoo</span><span class="chip" data-g="inst">Death Whistles</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Vocals</div>
+    <div class="chips">
+      <span class="chip" data-g="vocals">Throat Drones</span><span class="chip" data-g="vocals">Deep Chanting</span><span class="chip" data-g="vocals">Aggressive Chanting</span><span class="chip" data-g="vocals">Primal Male Vocals</span><span class="chip" data-g="vocals">Layered Chanting</span><span class="chip" data-g="vocals">Monastic Male Bass</span><span class="chip" data-g="vocals">Haunting Female Alto</span><span class="chip" data-g="vocals">Raspy Guttural Vocals</span><span class="chip" data-g="vocals">Ghostly Female Soprano</span><span class="chip" data-g="vocals">Operatic</span><span class="chip" data-g="vocals">Robotic Monotone</span><span class="chip" data-g="vocals">Whispered Rasp</span><span class="chip" data-g="vocals">Shouted Male Vocals</span><span class="chip" data-g="vocals">Devilish Male Voice</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Effects &amp; Production</div>
+    <div class="chips">
+      <span class="chip" data-g="fx">Heavy Reverb</span><span class="chip" data-g="fx">Tape Saturation</span><span class="chip" data-g="fx">Bitcrushing</span><span class="chip" data-g="fx">Tube Distortion</span><span class="chip" data-g="fx">Fuzz</span><span class="chip" data-g="fx">Glitch Effects</span><span class="chip" data-g="fx">Lo-fi</span><span class="chip" data-g="fx">White Noise Sweeps</span><span class="chip" data-g="fx">Metal Scraping</span><span class="chip" data-g="fx">Chains Clinking</span><span class="chip" data-g="fx">Human Screams</span><span class="chip" data-g="fx">Bone Crack</span><span class="chip" data-g="fx">Heavy Breathing</span><span class="chip" data-g="fx">Distant Thunder</span><span class="chip" data-g="fx">Crackling Vinyl</span><span class="chip" data-g="fx">Raw Production</span><span class="chip" data-g="fx">Gothic Cathedral Reverb</span><span class="chip" data-g="fx">Sub-bass Drops</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Key / Mode</div>
+    <div class="chips">
+      <span class="chip" data-g="key">D Minor</span><span class="chip" data-g="key">C Minor</span><span class="chip" data-g="key">E Minor</span><span class="chip" data-g="key">Phrygian Dominant Scale</span><span class="chip" data-g="key">Locrian Mode</span><span class="chip" data-g="key">Dorian Mode</span><span class="chip" data-g="key">Double Harmonic Scale</span><span class="chip" data-g="key">Atonal</span><span class="chip" data-g="key">Dissonant</span><span class="chip" data-g="key">Tritone intervals</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">BPM</div>
+    <div class="bpm-row">
+      <input type="range" class="bpm-slider" id="bpm-slider" min="40" max="220" value="90" oninput="updateBpm(this)">
+      <div class="bpm-display" id="bpm-display">90 BPM</div>
+      <div class="bpm-beatless" id="bpm-beatless" onclick="toggleBeatless()">Beatless</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Lyrics</div>
+
+    <div class="toggle-row" onclick="toggleBilingual()">
+      <div class="tog-track" id="bil-track"><div class="tog-knob"></div></div>
+      <span class="tog-label">Bilingual Mode</span>
+    </div>
+
+    <div id="lang-section">
+      <div class="section-title" style="margin-bottom:8px;">Ancient Language ↔ English</div>
+      <div class="lang-row">
+        <span class="lang-chip selected" data-lang="Latin">Latin</span>
+        <span class="lang-chip" data-lang="Sumerian">Sumerian</span>
+        <span class="lang-chip" data-lang="Enochian">Enochian</span>
+        <span class="lang-chip" data-lang="Ancient Egyptian">Ancient Egyptian</span>
+        <span class="lang-chip" data-lang="Old Norse">Old Norse</span>
+        <span class="lang-chip" data-lang="Ancient Greek">Ancient Greek</span>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-bottom:8px;">Insert Structural Cue</div>
+    <div class="cue-grid">
+      <button class="cue-btn" onclick="insertCue('Intro')">Intro</button>
+      <button class="cue-btn" onclick="insertCue('Verse')">Verse</button>
+      <button class="cue-btn" onclick="insertCue('Pre-Chorus')">Pre-Chorus</button>
+      <button class="cue-btn" onclick="insertCue('Chorus')">Chorus</button>
+      <button class="cue-btn" onclick="insertCue('Build')">Build</button>
+      <button class="cue-btn" onclick="insertCue('Bridge')">Bridge</button>
+      <button class="cue-btn" onclick="insertCue('Drop')">Drop</button>
+      <button class="cue-btn" onclick="insertCue('Breakdown')">Breakdown</button>
+      <button class="cue-btn" onclick="insertCue('Crescendo')">Crescendo</button>
+      <button class="cue-btn" onclick="insertCue('Ambient Interlude')">Amb. Interlude</button>
+      <button class="cue-btn" onclick="insertCue('Dissonant Solo')">Diss. Solo</button>
+      <button class="cue-btn" onclick="insertCue('Spoken Word')">Spoken Word</button>
+      <button class="cue-btn" onclick="insertCue('Instrumental Break')">Inst. Break</button>
+      <button class="cue-btn" onclick="insertCue('Climax')">Climax</button>
+      <button class="cue-btn" onclick="insertCue('Beat Switch')">Beat Switch</button>
+      <button class="cue-btn" onclick="insertCue('Outro')">Outro</button>
+    </div>
+
+    <button class="gen-btn" id="gen-btn" onclick="generateLyrics()">⚗ Auto-Generate Lyrics (90+ words)</button>
+    <textarea class="lyric-area" id="lyric-area" oninput="updateWC()" placeholder="Write manually or tap Auto-Generate to summon 90+ word lyrics from the dark..."></textarea>
+    <div class="word-count under" id="wc">0 / 90 lyric words</div>
+  </div>
+
+  <div style="padding:14px">
+    <div class="loading" id="loading">⚰ Invoking the ritual... ⚰</div>
+    <button class="build-btn" id="forge-btn" onclick="buildAndView()">⚔ Forge the Ritual ⚔</button>
+  </div>
+</div>
+
+<!-- RITUALS -->
+<div class="panel" id="panel-rituals">
+  <div class="hint">Tap any ritual to auto-generate full lyrics</div>
+  <div class="tgrid" id="tgrid"></div>
+</div>
+
+<!-- OUTPUT -->
+<div class="panel" id="panel-output">
+  <div class="out-wrap">
+    <div class="runes">ᚱ ᚢ ᚾ ᚨ</div>
+    <div class="out-box">
+      <div class="out-label">Style Box <button class="copy-btn" id="cb-style" onclick="doCopy('style-out','cb-style')">Copy</button></div>
+      <div class="out-text" id="style-out"><span class="empty">Forge your ritual first...</span></div>
+    </div>
+    <div class="out-box">
+      <div class="out-label">Lyrics Box <button class="copy-btn" id="cb-lyrics" onclick="doCopy('lyrics-out','cb-lyrics')">Copy</button></div>
+      <div class="out-text" id="lyrics-out"><span class="empty">No lyrics forged yet...</span></div>
+    </div>
+    <div class="runes">ᛏ ᛁ ᚹ ᚨ ᛉ</div>
+  </div>
+</div>
+
+<script>
+const TEMPLATES=[
+  {name:"Ritualistic Dark Ambient",sub:"Cinematic · Slow Creep",bpm:"60",style:"Dark Ritualistic Ambient, Occult, Sinister, Cinematic Soundscapes, Deep Drones, Throat Singing, Heavy Reverb, 60 BPM"},
+  {name:"Blackened Pagan Folk",sub:"Ancient · Primal",bpm:"~",style:"Blackened Folk, Pagan, Tribal War Drums, Ancient, Primal Male Vocals, Hurdy-Gurdy, Dark Celtic, Raw Production"},
+  {name:"Industrial Occult",sub:"Mechanical Evil",bpm:"130",style:"Industrial Occult, Dark Techno, Distorted Synths, Bitcrushing, Metal Scraping, Aggressive, 130 BPM, Heavy Sub Bass"},
+  {name:"Sumerian Incantation",sub:"Mesopotamian · Hypnotic",bpm:"~",style:"Ancient Mesopotamian, Ritualistic, Ney Flute, Lyre, Bronze Rattles, Haunting Female Alto, Hypnotic, Lo-fi Warmth"},
+  {name:"Symphonic Black Opera",sub:"Grand · Explosive",bpm:"~",style:"Symphonic Black Metal, Operatic, Menacing, Pipe Organ, Powerful Choir, Orchestral Crescendo, Explosive"},
+  {name:"Horror Soundscape",sub:"Pure FX · No Melody",bpm:"~",style:"Horror Soundscape, Eerie, Dark Ambient, Human Screams, Bone Cracking, Tape Saturation, Non-melodic"},
+  {name:"Dark Cabaret",sub:"Theatrical · Devilish",bpm:"90",style:"Dark Cabaret, Theatrical, Devilish Male Voice, Brass Section, Snapping Fingers, Vintage Vibe, 90 BPM"},
+  {name:"Gnostic Chamber",sub:"Liturgical · Eerie",bpm:"55",style:"Dark Liturgical, Gnostic, Haunting Cello, Reverb-heavy Chamber, Monastic, Male Bass Vocals, 55 BPM, Sinister"},
+  {name:"Blackened Sludge",sub:"Crushing Doom",bpm:"~",style:"Blackened Sludge Metal, Doom, Crushing Low-end, Distorted Fuzz, Slow Grave Tempo, Raspy Guttural Vocals"},
+  {name:"Desert Hermit",sub:"Ancient Middle East",bpm:"~",style:"Dark Middle Eastern Folk, Desert Ritual, Bağlama Saz, Frame Drums, Wind Howling, Dry Vocal Stems, Occult"},
+  {name:"Victorian Séance",sub:"Haunted Parlour",bpm:"~",style:"Victorian Horror, Dark Waltz, Detuned Piano, Ghostly Female Soprano, Music Box, Crackling Vinyl Texture"},
+  {name:"Cyber-Occult",sub:"Dark Techno · Digital",bpm:"140",style:"Cyber-Occult, Dark Techno, Glitch, Tribal Percussion, 140 BPM, Aggressive, Mechanical Breathing, Sub-bass Drops"},
+  {name:"Norse Sacrifice",sub:"Viking Blood Ritual",bpm:"80",style:"Viking War Chant, Primal, Deep War Drums, Throat Drones, Shouted Male Vocals, Bone Percussion, Raw, 80 BPM"},
+  {name:"Pharaonic Ambient",sub:"Egyptian · Timeless",bpm:"Beatless",style:"Ancient Egyptian Scales, Oud, Dark Ambient, Sandstorm White Noise, Deep Sub-Drones, Pharaonic Ambient, Arrhythmic"},
+  {name:"Sumerian Jazz",sub:"Dark Noir · Ancient",bpm:"75",style:"Dark Jazz, Ancient Lyre, Double Bass, Smoky, Mesopotamian Melodies, Muted Trumpet, 75 BPM"},
+  {name:"Baroque Black Metal",sub:"Harpsichord · Blast Beats",bpm:"175",style:"Baroque Black Metal, Harpsichord, Operatic Screams, Rapid Double-Kick, Gothic Cathedral Reverb, 175 BPM"},
+  {name:"Sacrificial Synthwave",sub:"Retro Dark · Ritualistic",bpm:"115",style:"80s Outrun, Dark Synth, Human Scream Samples, Analog Distortion, Ritualistic Arpeggios, 115 BPM"}
+];
+
+let beatless=false, bpmVal=90, bilingualOn=false, bilingualLang='Latin';
+
+function init(){
+  document.querySelectorAll('.chip').forEach(c=>{
+    c.addEventListener('click',()=>{
+      if(c.dataset.g==='key') document.querySelectorAll('.chip[data-g="key"]').forEach(x=>x.classList.remove('selected'));
+      c.classList.toggle('selected');
+    });
+  });
+  document.querySelectorAll('.lang-chip').forEach(c=>{
+    c.addEventListener('click',()=>{
+      document.querySelectorAll('.lang-chip').forEach(x=>x.classList.remove('selected'));
+      c.classList.add('selected');
+      bilingualLang=c.dataset.lang;
+    });
+  });
+  const g=document.getElementById('tgrid');
+  TEMPLATES.forEach(t=>{
+    const d=document.createElement('div');
+    d.className='tcard';
+    d.innerHTML=`<div class="tcard-bpm">${t.bpm!=='~'?t.bpm:''}</div><div class="tcard-name">${t.name}</div><div class="tcard-sub">${t.sub}</div>`;
+    d.addEventListener('click',()=>loadTemplate(t));
+    g.appendChild(d);
+  });
+  updateBpmTrack(90);
+}
+
+function toggleBilingual(){
+  bilingualOn=!bilingualOn;
+  document.getElementById('bil-track').classList.toggle('on',bilingualOn);
+  document.getElementById('lang-section').classList.toggle('visible',bilingualOn);
+}
+
+function updateBpm(el){
+  bpmVal=parseInt(el.value);
+  document.getElementById('bpm-display').textContent=bpmVal+' BPM';
+  beatless=false;
+  document.getElementById('bpm-beatless').classList.remove('selected');
+  updateBpmTrack(bpmVal);
+}
+function updateBpmTrack(v){
+  document.getElementById('bpm-slider').style.setProperty('--pct',((v-40)/(220-40)*100)+'%');
+}
+function toggleBeatless(){
+  beatless=!beatless;
+  document.getElementById('bpm-beatless').classList.toggle('selected',beatless);
+  document.getElementById('bpm-display').textContent=beatless?'Beatless':bpmVal+' BPM';
+}
+
+function insertCue(n){
+  const ta=document.getElementById('lyric-area');
+  const s=ta.selectionStart;
+  const cue=`[${n}]\n`;
+  ta.value=ta.value.substring(0,s)+cue+ta.value.substring(ta.selectionEnd);
+  ta.selectionStart=ta.selectionEnd=s+cue.length;
+  ta.focus(); updateWC();
+}
+
+function lyricWords(text){
+  const s=text.replace(/\[[^\]]*\]/g,'').trim();
+  return s?s.split(/\s+/).filter(w=>w).length:0;
+}
+function updateWC(){
+  const wc=lyricWords(document.getElementById('lyric-area').value);
+  const el=document.getElementById('wc');
+  el.textContent=wc+' / 90 lyric words';
+  el.className='word-count '+(wc>=90?'over':'under');
+}
+
+function styleBox(){
+  const parts=[];
+  ['genre','mood','inst','vocals','fx'].forEach(g=>
+    document.querySelectorAll(`.chip[data-g="${g}"].selected`).forEach(c=>parts.push(c.textContent.trim()))
+  );
+  const k=document.querySelector('.chip[data-g="key"].selected');
+  if(k) parts.push(k.textContent.trim());
+  parts.push(beatless?'Arrhythmic':bpmVal+' BPM');
+  return parts.join(', ');
+}
+
+function setLoading(on){
+  document.getElementById('loading').classList.toggle('on',on);
+  document.getElementById('forge-btn').style.display=on?'none':'block';
+  const b=document.getElementById('gen-btn');
+  b.disabled=on;
+  b.textContent=on?'⚗ Summoning...':'⚗ Auto-Generate Lyrics (90+ words)';
+}
+
+async function generateLyrics(styleOverride){
+  const style=styleOverride||styleBox();
+  const seed=document.getElementById('lyric-area').value.trim();
+  setLoading(true);
+
+  const bilingual=bilingualOn
+    ?`BILINGUAL ALTERNATING MODE REQUIRED: Every lyric line must strictly alternate. Odd lines in ${bilingualLang} (authentic dark ancient phrasing). Even lines in English (a sinister poetic echo — NOT a literal translation). Apply this alternation in every verse and chorus without exception.`
+    :'';
+
+  const prompt=`You are a dark ritual songwriter writing Suno AI lyrics.
+
+Style: ${style||'Dark Ritualistic Ambient, Occult, Ancient'}
+${seed?'Expand from this skeleton:\n'+seed+'\n':''}
+RULES:
+- Minimum 90 lyric words. Text inside [square brackets] does NOT count toward this total.
+- Include Suno structural cue tags: [Intro: description], [Verse: vocal style], [Chorus: instruction], [Bridge], [Outro: description]
+- Write at least: Intro cue, Verse 1 (full), Chorus (full), Verse 2 (full), Bridge or Outro
+- Lyrics must be dark, ancient, ritualistic, matching the style context above
+${bilingual}
+Output ONLY the lyrics and cue tags. No titles, no preamble, no markdown, no explanation.`;
+
+  try{
+    const r=await fetch('/api/lyrics',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ prompt })
+    });
+    const d=await r.json();
+    if(!r.ok||d.error) throw new Error(d.error||'Server error '+r.status);
+    if(d.lyrics){
+      document.getElementById('lyric-area').value=d.lyrics;
+      updateWC();
+    }
+  }catch(e){
+    document.getElementById('lyric-area').value='// Generation failed: '+e.message;
+  }
+  setLoading(false);
+}
+
+async function loadTemplate(t){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('lyric-area').value='';
+  updateWC();
+  if(t.bpm==='Beatless'){
+    beatless=true;
+    document.getElementById('bpm-beatless').classList.add('selected');
+    document.getElementById('bpm-display').textContent='Beatless';
+  }else if(t.bpm!=='~'){
+    beatless=false; bpmVal=parseInt(t.bpm);
+    document.getElementById('bpm-slider').value=bpmVal;
+    document.getElementById('bpm-display').textContent=bpmVal+' BPM';
+    updateBpmTrack(bpmVal);
+    document.getElementById('bpm-beatless').classList.remove('selected');
+  }
+  switchTab('forge');
+  await generateLyrics(t.style);
+  renderOutput(t.style, document.getElementById('lyric-area').value.trim());
+  switchTab('output');
+}
+
+async function buildAndView(){
+  let style=styleBox();
+  let lyrics=document.getElementById('lyric-area').value.trim();
+  if(lyricWords(lyrics)<90){
+    await generateLyrics(style);
+    lyrics=document.getElementById('lyric-area').value.trim();
+    style=styleBox();
+  }
+  renderOutput(style,lyrics);
+  switchTab('output');
+}
+
+function renderOutput(style,lyrics){
+  document.getElementById('style-out').innerHTML=style||'<span class="empty">No style tags selected...</span>';
+  document.getElementById('lyrics-out').innerHTML=lyrics
+    ?lyrics.replace(/\[([^\]]+)\]/g,'<span class="ctag">[$1]</span>')
+    :'<span class="empty">No lyrics forged yet...</span>';
+}
+
+function doCopy(id,btnId){
+  const text=document.getElementById(id).textContent;
+  const btn=document.getElementById(btnId);
+  const done=()=>{btn.textContent='✓ Copied';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied')},2000)};
+  navigator.clipboard.writeText(text).then(done).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=text;ta.style.cssText='position:fixed;opacity:0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');
+    document.body.removeChild(ta);done();
+  });
+}
+
+function switchTab(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.querySelectorAll('.tab')[['forge','rituals','output'].indexOf(name)].classList.add('active');
+}
+
+init();
+</script>
+</body>
+</html>
